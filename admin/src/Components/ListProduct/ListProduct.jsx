@@ -3,7 +3,7 @@ import "./ListProduct.css";
 import cross_icon from "../../assets/cross_icon.png"
 
 const ListProduct = () => {
-  const url="http://localhost:4000"
+  const url="https://backend-p5n2.onrender.com"
   const [allproducts, setAllProducts] = useState([]);
 
   const fetchInfo = async () => {
