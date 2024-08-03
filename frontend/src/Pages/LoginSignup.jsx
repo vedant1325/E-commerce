@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./CSS/LoginSignup.css";
+import { ShopContext } from "../Context/ShopContext";
 
 const LoginSignup = () => {
+  const{url}=useContext(ShopContext)
   const [state, setState] = useState("Login");
 
   const [formData, setFormData] = useState({
@@ -16,7 +18,7 @@ const LoginSignup = () => {
   const login = async () => {
     console.log("Login function executed", formData);
     let responseData;
-   await fetch('http://localhost:4000/login',{
+   await fetch(url+'/login',{
     method:'POST',
     headers:{
       Accept:'application/form-data',
@@ -40,7 +42,7 @@ else{
   const signup = async () => {
     console.log("Signup function executed".formData);
     let responseData;
-   await fetch('http://localhost:4000/signup',{
+   await fetch(url+'/signup',{
     method:'POST',
     headers:{
       Accept:'application/form-data',
