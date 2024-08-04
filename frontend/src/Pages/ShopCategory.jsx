@@ -11,10 +11,10 @@ const ShopCategory = (props) => {
     <div className="shop-category">
       <img className="shopcategorybanner" src={props.banner} alt="" />
       <div className="shopcategory-indexSort">
-        <span>Showing 1-12</span> out of 36 product
+        <span>Showing 1-12</span> out of 36 products
         <div className="shopcategory-sort">
           Sort by
-          <img src={dropdown_icon} alt="" />
+          <img src={dropdown_icon} alt="Sort dropdown" />
         </div>
       </div>
       <div className="shopcategory-product">
@@ -31,6 +31,7 @@ const ShopCategory = (props) => {
               />
             );
           }
+          return null; // Explicitly return null if condition is not met
         })}
       </div>
       <Link style={{ textDecoration: "none" }} to="/latest">
