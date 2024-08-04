@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from "react";
 
 
 export const ShopContext = createContext(null);
-const url="https://backend-p5n2.onrender.com";
+const url="https://e-commerce-d0l3.onrender.com";
 
 const getDedfaultCart = () => {
   let cart = {};
