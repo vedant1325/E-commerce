@@ -1,33 +1,27 @@
-const port =process.env.PORT || 4000;
+const port = process.env.PORT || 4000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const { type } = require("os");
-const { error } = require("console");
 
+const FRONTEND_URL ='https://e-commerce-frontend-2o32.onrender.com';
 
 app.use(
   express.json()
-); /*With the help of express.json(), whatever request we get from response, can get automatically passed through json */
+);
 app.use(
   cors()
-); /*using this our project will connect to express app on 4000 port */
+);
 
 // Database connection with Mongodb
 mongoose.connect(
   "mongodb+srv://vedantdange:Vedant2003@cluster0.bpzfm00.mongodb.net/e-commerce"
 );
 
-//API creation
-app.get("/", (req, res) => {
-  res.send("Express app is running");
-});
-
-//Image storage Engine
+// Image storage Engine
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
@@ -40,20 +34,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-//Creating Upload endpoint for images
-
+// Creating Upload endpoint for images
 app.use(`/images`, express.static("upload/images"));
 
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
-    //When the image is successfully uploaded
     success: 1,
-    image_url: `http://localhost:${port}/images/${req.file.filename}`,
+    image_url: `${FRONTEND_URL}/images/${req.file.filename}`,
   });
 });
 
-//Creating Schema for storing
-
+// Creating Schema for storing
 const Product = mongoose.model("Product", {
   id: {
     type: Number,
@@ -88,6 +79,7 @@ const Product = mongoose.model("Product", {
     default: true,
   },
 });
+
 app.post("/addproduct", async (req, res) => {
   let products = await Product.find({});
   let id;
@@ -108,7 +100,7 @@ app.post("/addproduct", async (req, res) => {
     old_price: req.body.old_price,
   });
   console.log(product);
-  //Saving product in database
+  // Saving product in database
   await product.save();
   console.log("Save");
   res.json({
@@ -117,7 +109,7 @@ app.post("/addproduct", async (req, res) => {
   });
 });
 
-//Creating API for deleting Product
+// Creating API for deleting Product
 app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
   console.log("Product is Removed");
@@ -127,15 +119,13 @@ app.post("/removeproduct", async (req, res) => {
   });
 });
 
-//Creating API for getting all product
+// Creating API for getting all products
 app.get("/allproduct", async (req, res) => {
   let products = await Product.find({});
-  console.log("All product are fetched");
+  console.log("All products are fetched");
   console.log(products);
   res.send(products);
 });
-
-//****************************************************************************************** */
 
 // Creating Schema for Users
 const Users = mongoose.model("Users", {
@@ -158,16 +148,16 @@ const Users = mongoose.model("Users", {
   },
 });
 
-//Creating API for registering users
+// Creating API for registering users
 app.post("/signup", async (req, res) => {
-  //Now we check wheather the email already exists or not or,the user exist or not
+  // Check if the email already exists
   let check = await Users.findOne({ email: req.body.email });
   if (check) {
     return res
       .status(400)
       .json({
         success: false,
-        error: "existing user found with same email address",
+        error: "Existing user found with same email address",
       });
   }
 
@@ -182,44 +172,42 @@ app.post("/signup", async (req, res) => {
     password: req.body.password,
     cartData: cart
   });
-  //Saving user in database
+  // Saving user in database
   await user.save();
 
   const data = {
-    user:{
-      id:user.id
+    user: {
+      id: user.id
     }
   }
-  //creating token
+  // Creating token
   const token = jwt.sign(data, 'secret_ecom');
-  res.json({ success:true, token });
+  res.json({ success: true, token });
 });
 
-//Creating Endpoint for user login
-app.post('/login',async(req,res)=>{
-  let user=await Users.findOne({email:req.body.email});
-  if(user){
-    const passCompare=req.body.password===user.password;
-    if(passCompare){
+// Creating Endpoint for user login
+app.post('/login', async (req, res) => {
+  let user = await Users.findOne({ email: req.body.email });
+  if (user) {
+    const passCompare = req.body.password === user.password;
+    if (passCompare) {
 
       const data = {
         user: {
-          id:user.id
+          id: user.id
         }
       }
-      const token=jwt.sign(data,'secret_ecom');   
-      res.json({success:true,token});
+      const token = jwt.sign(data, 'secret_ecom');
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, errors: "Wrong Password" });
     }
-    else{
-      res.json({success:false,errors:"Wrong Password"})
-    }
+  } else {
+    res.json({ success: false, errors: "User Not Found" });
   }
-  else{
-    res.json({success:false,errors:"User Not Found"})
-  }
-})
+});
 
-//Creating middleware to fetch user
+// Creating middleware to fetch user
 const fetchUser = (req, res, next) => {
   const token = req.header('auth-token');
   if (!token) {
@@ -228,73 +216,61 @@ const fetchUser = (req, res, next) => {
 
   try {
     const data = jwt.verify(token, 'secret_ecom');
-   req.user =data.user;
+    req.user = data.user;
     next();
   } catch (error) {
-    return res.status(401).send({ errors:'Please authenticate using a valid token' });
+    return res.status(401).send({ errors: 'Please authenticate using a valid token' });
   }
 };
 
-//Creating End Point for aading products in cartdata
-app.post('/addtocart',fetchUser,async(req,res)=>{
-console.log(req.body,req.user);
-console.log("Added",req.body.itemId)
-let userData=await Users.findOne({_id:req.user.id});
-userData.cartData[req.body.itemId]+=1;
-await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
-res.json({ message: "Added" });
+// Creating Endpoint for adding products to cart
+app.post('/addtocart', fetchUser, async (req, res) => {
+  console.log(req.body, req.user);
+  console.log("Added", req.body.itemId)
+  let userData = await Users.findOne({ _id: req.user.id });
+  userData.cartData[req.body.itemId] += 1;
+  await Users.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
+  res.json({ message: "Added" });
+});
 
-})
-
-//Creating endpoint to remove product from cartdata
-app.post('/removefromcart',fetchUser,async(req,res)=>{
-  console.log("Removed",req.body.itemId)
-  let userData=await Users.findOne({_id:req.user.id});
-  if(userData.cartData[req.body.itemId]>0)
-  userData.cartData[req.body.itemId]-=1;
-  await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
+// Creating endpoint to remove product from cart
+app.post('/removefromcart', fetchUser, async (req, res) => {
+  console.log("Removed", req.body.itemId)
+  let userData = await Users.findOne({ _id: req.user.id });
+  if (userData.cartData[req.body.itemId] > 0)
+    userData.cartData[req.body.itemId] -= 1;
+  await Users.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
   res.json({ message: "Removed" });
-  
+});
 
-})
-
-//creating end point to get cartdata
-app.post('/getcart',fetchUser,async(req,res)=>{
+// Creating endpoint to get cart data
+app.post('/getcart', fetchUser, async (req, res) => {
   console.log("Get Cart");
-  let userData=await Users.findOne({_id:req.user.id})
+  let userData = await Users.findOne({ _id: req.user.id })
   res.json(userData.cartData);
-})
+});
 
-/*____________________________________________________________________________________________________ */
-
-
-//Creating End Point for new Collection
-app.get('/newcollection',async(req,res)=>{
-  let products=await Product.find({});
-  //now we will execute the new collection or last 8 products
-  let newcollection=products.slice(1).slice(-8);
+// Creating Endpoint for new Collection
+app.get('/newcollection', async (req, res) => {
+  let products = await Product.find({});
+  // Now we will execute the new collection or last 8 products
+  let newcollection = products.slice(1).slice(-8);
   console.log("New Collection Fetched");
   res.send(newcollection)
-})
+});
 
-
-//Creating end point for Popular in women
-app.get('/popularinwomen',async(req,res)=>{
-const products= await Product.find({category:'women'});
-const popular=products.slice(0,4);
-console.log("Popular in Women Fetched");
-res.send(popular);
-
-})
-
-
-
-
+// Creating endpoint for Popular in women
+app.get('/popularinwomen', async (req, res) => {
+  const products = await Product.find({ category: 'women' });
+  const popular = products.slice(0, 4);
+  console.log("Popular in Women Fetched");
+  res.send(popular);
+});
 
 app.listen(port, (error) => {
   if (!error) {
-    console.log("Server running on port" + port);
+    console.log("Server running on port " + port);
   } else {
-    console.log("Error : " + error);
+    console.log("Error: " + error);
   }
 });
