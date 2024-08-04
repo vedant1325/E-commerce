@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import './RelatedProduct.css'
 import data_product from '../Assets/data'
 import Items from '../Items/Items'
-import { ShopContext } from '../../Context/ShopContext'
+
 
 
 
