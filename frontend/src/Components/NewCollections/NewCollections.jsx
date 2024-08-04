@@ -4,9 +4,10 @@ import './NewCollections.css'
 import Items from '../Items/Items'
 
 const NewCollections = () => {
+  const url="https://e-commerce-d0l3.onrender.com"
   let [new_collection,setNew_Collection]=useState([]);
   useEffect(()=>{
- fetch('http://localhost:4000/newcollection')
+ fetch(url+'/newcollection')
  .then((response)=>response.json())
  .then((data)=>{setNew_Collection(data)})
 
