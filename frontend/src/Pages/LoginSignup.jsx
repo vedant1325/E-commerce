@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import "./CSS/LoginSignup.css";
-import { ShopContext } from "../Context/ShopContext";
+
 
 const LoginSignup = () => {
-  const{url}=useContext(ShopContext)
+   const url="https://backend-p5n2.onrender.com"
   const [state, setState] = useState("Login");
 
   const [formData, setFormData] = useState({
