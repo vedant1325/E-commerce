@@ -3,7 +3,7 @@ import "./AddProduct.css";
 import upload_area from "../../assets/upload_area.svg";
 
 const AddProduct = () => {
-  const url="https://e-commerce-d0l3.onrender.com"
+  const url="https://backend-p5n2.onrender.com"
   const [image, setImage] = useState(false);
   const [productDetails, setProductDetails] = useState({
     name: "",
